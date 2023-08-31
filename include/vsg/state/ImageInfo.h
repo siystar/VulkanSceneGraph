@@ -30,7 +30,6 @@ namespace vsg
             imageView(in_imageView),
             imageLayout(in_imageLayout)
         {
-            computeNumMipMapLevels();
         }
 
         // Convenience constructor that creates a vsg::ImageView and vsg::Image to represent the data on the GPU.
@@ -43,8 +42,6 @@ namespace vsg
             image->usage |= (VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
             imageView = ImageView::create(image);
-
-            computeNumMipMapLevels();
         }
 
         ImageInfo(const ImageInfo&) = delete;
@@ -53,8 +50,6 @@ namespace vsg
         explicit operator bool() const { return sampler.valid() && imageView.valid(); }
 
         int compare(const Object& rhs_object) const override;
-
-        void computeNumMipMapLevels();
 
         ref_ptr<Sampler> sampler;
         ref_ptr<ImageView> imageView;

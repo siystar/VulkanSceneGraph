@@ -136,30 +136,3 @@ int ImageInfo::compare(const Object& rhs_object) const
     return compare_value(imageLayout, rhs.imageLayout);
 }
 
-void ImageInfo::computeNumMipMapLevels()
-{
-    if (imageView && imageView->image && imageView->image->data)
-    {
-        auto image = imageView->image;
-        auto data = image->data;
-        auto mipLevels = vsg::computeNumMipMapLevels(data, sampler);
-
-        const auto& mipmapOffsets = image->data->computeMipmapOffsets();
-        bool generateMipmaps = (mipLevels > 1) && (mipmapOffsets.size() <= 1);
-
-        if (generateMipmaps)
-        {
-            // check that the data isn't compressed.
-            const auto& properties = data->properties;
-            if (properties.blockWidth > 1 || properties.blockHeight > 1 || properties.blockDepth > 1)
-            {
-                sampler->maxLod = 0.0f;
-                mipLevels = 1;
-            }
-        }
-
-        image->mipLevels = mipLevels;
-
-        if (generateMipmaps) image->usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    }
-}

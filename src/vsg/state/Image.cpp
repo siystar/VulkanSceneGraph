@@ -93,7 +93,30 @@ Image::Image(ref_ptr<Data> in_data) :
         }
 
         format = properties.format;
-        mipLevels = static_cast<uint32_t>(mipmapOffsets.size());
+        if (mipmapOffsets.size() > 1)
+        {
+            mipLevels = static_cast<uint32_t>(mipmapOffsets.size());
+        }
+        else
+        {
+            // check that the data isn't compressed.
+            if (properties.blockWidth > 1 && properties.blockHeight > 1 || properties.blockDepth > 1)
+            {
+                mipLevels = 1;
+            }
+            else
+            {
+                // generate complete mipmap chain by default.
+                usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+                uint32_t maxDimension = std::max({width, height, depth});
+                mipLevels = 1;
+                while ((1u << mipLevels) <= maxDimension)
+                {
+                    ++mipLevels;
+                }
+            }
+        }
+
         extent = VkExtent3D{width, height, depth};
 
         // remap RGB to RGBA
